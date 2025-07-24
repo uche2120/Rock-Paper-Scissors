@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock Paper Scissors | Classic Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Rock Paper Scissors</h1>
+            <p class="subtitle">The classic game of strategy and chance. Challenge the computer and see if you can come out on top!</p>
+        </header>
+        
+        <div class="game-container">
+            <div class="scoreboard">
+                <div class="score">
+                    <h2>Player</h2>
+                    <div class="score-value" id="player-score">0</div>
+                </div>
+                <div class="score">
+                    <h2>Computer</h2>
+                    <div class="score-value" id="computer-score">0</div>
+                </div>
+            </div>
+            
+            <div class="result">
+                <p class="result-text">Choose your weapon!</p>
+                <p class="round-result">First to score 5 points wins the game</p>
+            </div>
+            
+            <div class="selected-choices">
+                <div class="selection">
+                    <p>Your Choice</p>
+                    <i id="player-choice-icon" class="fas fa-question"></i>
+                </div>
+                <div class="selection">
+                    <p>Computer</p>
+                    <i id="computer-choice-icon" class="fas fa-question"></i>
+                </div>
+            </div>
+            
+            <div class="choices">
+                <button class="choice" id="rock" aria-label="Rock">
+                    <i class="fas fa-hand-rock"></i>
+                </button>
+                <button class="choice" id="paper" aria-label="Paper">
+                    <i class="fas fa-hand-paper"></i>
+                </button>
+                <button class="choice" id="scissors" aria-label="Scissors">
+                    <i class="fas fa-hand-scissors"></i>
+                </button>
+            </div>
+            
+            <button class="btn btn-reset" id="reset">Reset Game</button>
+        </div>
+        
+        <div class="rules">
+            <h2>Game Rules</h2>
+            <ul>
+                <li>Rock crushes Scissors</li>
+                <li>Scissors cuts Paper</li>
+                <li>Paper covers Rock</li>
+                <li>If both players choose the same item, it's a tie</li>
+                <li>First to score 5 points wins the game</li>
+            </ul>
+        </div>
+        
+        <footer>
+            <p>©2025 Rock Paper Scissors</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const choices = document.querySelectorAll('.choice');
+            const playerScoreEl = document.getElementById('player-score');
+            const computerScoreEl = document.getElementById('computer-score');
+            const resultText = document.querySelector('.result-text');
+            const roundResult = document.querySelector('.round-result');
+            const playerChoiceIcon = document.getElementById('player-choice-icon');
+            const computerChoiceIcon = document.getElementById('computer-choice-icon');
+            const resetBtn = document.getElementById('reset');
+            
+            // Game variables
+            let playerScore = 0;
+            let computerScore = 0;
+            let gameOver = false;
+            
+            // Icon mapping
+            const choiceIcons = {
+                rock: 'fa-hand-rock',
+                paper: 'fa-hand-paper',
+                scissors: 'fa-hand-scissors'
+            };
+            
+            // Event listeners
+            choices.forEach(choice => {
+                choice.addEventListener('click', () => {
+                    if (gameOver) return;
+                    
+                    const playerChoice = choice.id;
+                    playRound(playerChoice);
+                });
+            });
+            
+            resetBtn.addEventListener('click', resetGame);
+            
+            // Game functions
+            function playRound(playerChoice) {
+                const computerChoice = getComputerChoice();
+                const result = getRoundResult(playerChoice, computerChoice);
+                
+                // Update UI
+                updateChoices(playerChoice, computerChoice);
+                updateRoundResult(result, playerChoice, computerChoice);
+                updateScore(result);
+                
+                // Check for game winner
+                if (playerScore === 5 || computerScore === 5) {
+                    endGame();
+                }
+            }
+            
+            function getComputerChoice() {
+                const choices = ['rock', 'paper', 'scissors'];
+                const randomIndex = Math.floor(Math.random() * 3);
+                return choices[randomIndex];
+            }
+            
+            function getRoundResult(playerChoice, computerChoice) {
+                if (playerChoice === computerChoice) {
+                    return 'tie';
+                }
+                
+                if (
+                    (playerChoice === 'rock' && computerChoice === 'scissors') ||
+                    (playerChoice === 'paper' && computerChoice === 'rock') ||
+                    (playerChoice === 'scissors' && computerChoice === 'paper')
+                ) {
+                    return 'win';
+                }
+                
+                return 'lose';
+            }
+            
+            function updateChoices(playerChoice, computerChoice) {
+                playerChoiceIcon.className = 'fas ' + choiceIcons[playerChoice];
+                computerChoiceIcon.className = 'fas ' + choiceIcons[computerChoice];
+            }
+            
+            function updateRoundResult(result, playerChoice, computerChoice) {
+                if (result === 'tie') {
+                    roundResult.textContent = `Both chose ${playerChoice}. It's a tie!`;
+                    roundResult.style.color = 'var(--warning)';
+                } else if (result === 'win') {
+                    roundResult.textContent = `${capitalizeFirstLetter(playerChoice)} beats ${computerChoice}. You win!`;
+                    roundResult.style.color = 'var(--success)';
+                } else {
+                    roundResult.textContent = `${capitalizeFirstLetter(computerChoice)} beats ${playerChoice}. You lose!`;
+                    roundResult.style.color = 'var(--danger)';
+                }
+            }
+            
+            function updateScore(result) {
+                if (result === 'win') {
+                    playerScore++;
+                    playerScoreEl.textContent = playerScore;
+                } else if (result === 'lose') {
+                    computerScore++;
+                    computerScoreEl.textContent = computerScore;
+                }
+            }
+            
+            function endGame() {
+                gameOver = true;
+                
+                if (playerScore > computerScore) {
+                    resultText.textContent = 'Congratulations! You won the game!';
+                    resultText.style.color = 'var(--success)';
+                } else {
+                    resultText.textContent = 'Game over! The computer won.';
+                    resultText.style.color = 'var(--danger)';
+                }
+                
+                roundResult.textContent = 'Click "Reset Game" to play again';
+                roundResult.style.color = 'inherit';
+            }
+            
+            function resetGame() {
+                playerScore = 0;
+                computerScore = 0;
+                gameOver = false;
+                
+                playerScoreEl.textContent = '0';
+                computerScoreEl.textContent = '0';
+                
+                resultText.textContent = 'Choose your weapon!';
+                resultText.style.color = 'inherit';
+                
+                roundResult.textContent = 'First to score 5 points wins the game';
+                roundResult.style.color = 'inherit';
+                
+                playerChoiceIcon.className = 'fas fa-question';
+                computerChoiceIcon.className = 'fas fa-question';
+            }
+            
+            function capitalizeFirstLetter(string) {
+                return string.charAt(0).toUpperCase() + string.slice(1);
+            }
+        });
+    </script>
+</body>
+</html>
